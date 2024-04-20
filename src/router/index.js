@@ -1,25 +1,73 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-
+import { createRouter, createWebHashHistory } from 'vue-router'
 const routes = [
-  {
-    path: '/',
-    name: 'home',
-    component: HomeView
-  },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
+    {
+        path: '/',
+        redirect: '/login'
+    },
+    {
+        path: '/login',
+        name: 'login',
+        meta: {
+            title: '登录'
+        },
+        component: () => import('../view/login.vue')
+    },
+    {
+        path: '/home',
+        name: '主页',
+        meta: {
+            title: '主页'
+        },
+        component: () => import('../view/home.vue'),
+        redirect: '/index',
+        children: [
+            {
+                path: '/index',
+                meta: {
+                    title: '首页'
+                },
+                component: () => import('../view/welcome.vue')
+            },
+            // {
+            //     path: '/user/list',
+            //     meta: {
+            //         title: '用户管理'
+            //     },
+            //     component: () => import('../view/user/index.vue'),
+            // },
+            // {
+            //     path: '/user/detail',
+            //     meta: {
+            //         title: '用户详情'
+            //     },
+            //     component: () => import('../view/user/detail.vue'),
+            // },
+        ]
+    },
 ]
-
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
-  routes
+    history: createWebHashHistory(),
+    routes
+})
+// 挂载路由导航守卫：to表示将要访问的路径，from表示从哪里来，next是下一个要做的操作
+router.beforeEach((to, from, next) => {
+    // 修改页面 title
+    if (to.meta.title) {
+        document.title = '知否课堂后台管理系统 - ' + to.meta.title
+    }
+    // 放行登录页面
+    if (to.path === '/login') {
+        return next()
+    }
+    // 获取token
+    // const token= sessionStorage.getItem('token')
+    // if (!token) {
+    //   return next('/login')
+    // } else {
+    //   next()
+    // }
+    return next()
 })
 
+// 导出路由
 export default router
